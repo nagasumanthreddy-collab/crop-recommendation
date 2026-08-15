@@ -1,0 +1,625 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Field Almanac — Crop Recommendation Instrument</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,600&family=Public+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --soil-dark:#182619;
+    --soil-panel:#20301f;
+    --soil-panel-2:#28391f;
+    --line:#40522f;
+    --parchment:#efe7d2;
+    --parchment-dim:#d8cfb4;
+    --ink:#f2efe2;
+    --ink-dim:#aab89e;
+    --gold:#caa23f;
+    --leaf:#82ab5c;
+    --clay:#af6234;
+    --sky:#5f92a3;
+    --radius:14px;
+    --serif: "Fraunces", Georgia, serif;
+    --sans: "Public Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: "Space Mono", monospace;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 600px at 12% -10%, #24391f 0%, transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, #2a3a22 0%, transparent 55%),
+      var(--soil-dark);
+    color:var(--ink);
+    font-family:var(--sans);
+    min-height:100vh;
+    padding:clamp(18px, 4vw, 48px);
+  }
+
+  .wrap{ max-width:1180px; margin:0 auto; }
+
+  /* ---------- Header ---------- */
+  header{
+    border-bottom:1px solid var(--line);
+    padding-bottom:22px;
+    margin-bottom:28px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:16px;
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin:0 0 10px;
+  }
+  h1{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:clamp(30px, 4.4vw, 46px);
+    line-height:1.05;
+    margin:0;
+    color:var(--parchment);
+  }
+  h1 em{ font-style:italic; font-weight:600; color:var(--leaf); }
+  .tagline{
+    max-width:340px;
+    font-size:13.5px;
+    line-height:1.5;
+    color:var(--ink-dim);
+    text-align:right;
+  }
+  @media (max-width:640px){ .tagline{ text-align:left; } }
+
+  /* ---------- Layout ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:minmax(300px, 420px) 1fr;
+    gap:22px;
+    align-items:start;
+  }
+  @media (max-width:860px){ .grid{ grid-template-columns:1fr; } }
+
+  .panel{
+    background:linear-gradient(180deg, var(--soil-panel), var(--soil-panel-2));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px;
+  }
+  .panel + .panel{ margin-top:20px; }
+
+  .panel-title{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:16px;
+  }
+  .panel-title h2{
+    font-family:var(--serif);
+    font-size:19px;
+    font-weight:600;
+    margin:0;
+    color:var(--parchment);
+  }
+  .panel-title span{
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:var(--ink-dim);
+    letter-spacing:.08em;
+  }
+
+  /* ---------- Soil chips ---------- */
+  fieldset{ border:0; padding:0; margin:0 0 20px; }
+  legend{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    margin-bottom:10px;
+    padding:0;
+  }
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{ position:relative; }
+  .chip input{
+    position:absolute; opacity:0; inset:0; width:100%; height:100%; margin:0; cursor:pointer;
+  }
+  .chip label{
+    display:block;
+    font-family:var(--sans);
+    font-size:12.5px;
+    font-weight:600;
+    padding:7px 13px;
+    border-radius:99px;
+    border:1px solid var(--line);
+    color:var(--ink-dim);
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease, border-color .15s ease;
+    user-select:none;
+  }
+  .chip input:checked + label{
+    background:var(--leaf);
+    border-color:var(--leaf);
+    color:#182619;
+  }
+  .chip input:focus-visible + label{
+    outline:2px solid var(--gold);
+    outline-offset:2px;
+  }
+  .chip label:hover{ border-color:var(--leaf); color:var(--parchment); }
+
+  /* ---------- Sliders / instrument readouts ---------- */
+  .field{ margin-bottom:20px; }
+  .field:last-child{ margin-bottom:0; }
+  .field-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
+  }
+  .field-head label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .readout{
+    font-family:var(--mono);
+    font-size:13px;
+    font-weight:700;
+    color:var(--soil-dark);
+    background:var(--gold);
+    padding:2px 9px;
+    border-radius:5px;
+    min-width:56px;
+    text-align:center;
+  }
+
+  input[type="range"]{
+    -webkit-appearance:none;
+    appearance:none;
+    width:100%;
+    height:8px;
+    border-radius:99px;
+    outline:none;
+    cursor:pointer;
+    background:#33472a;
+  }
+  #temp{ background:linear-gradient(90deg, var(--sky), var(--parchment) 45%, var(--clay)); }
+  #humidity{ background:linear-gradient(90deg, #7a6636, var(--sky)); }
+  #rainfall{ background:linear-gradient(90deg, var(--parchment-dim), var(--sky)); }
+  #ph{ background:linear-gradient(90deg, var(--clay) 0%, var(--leaf) 50%, var(--sky) 100%); }
+
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:20px; height:20px;
+    border-radius:50%;
+    background:var(--soil-dark);
+    border:3px solid var(--parchment);
+    cursor:pointer;
+    box-shadow:0 0 0 2px rgba(0,0,0,.25);
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:20px; height:20px;
+    border-radius:50%;
+    background:var(--soil-dark);
+    border:3px solid var(--parchment);
+    cursor:pointer;
+  }
+  input[type="range"]:focus-visible::-webkit-slider-thumb{ outline:2px solid var(--gold); outline-offset:2px; }
+
+  .scale-labels{
+    display:flex; justify-content:space-between;
+    font-family:var(--mono); font-size:10px; color:var(--ink-dim); margin-top:5px;
+  }
+
+  .analyze-btn{
+    width:100%;
+    margin-top:6px;
+    padding:14px 18px;
+    background:var(--gold);
+    color:var(--soil-dark);
+    border:0;
+    border-radius:10px;
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:16px;
+    letter-spacing:.02em;
+    cursor:pointer;
+    transition:transform .12s ease, background .15s ease;
+  }
+  .analyze-btn:hover{ background:#dcb552; }
+  .analyze-btn:active{ transform:scale(.98); }
+  .analyze-btn:focus-visible{ outline:2px solid var(--parchment); outline-offset:3px; }
+
+  /* ---------- Instrument dial strip ---------- */
+  .dials{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:14px;
+    margin-bottom:20px;
+  }
+  @media (max-width:520px){ .dials{ grid-template-columns:repeat(2, 1fr); } }
+  .dial{
+    text-align:center;
+    padding:14px 8px 12px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:rgba(0,0,0,.15);
+  }
+  .dial-ring{
+    width:64px; height:64px;
+    margin:0 auto 8px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:conic-gradient(var(--leaf) calc(var(--pct,0) * 1%), #3a4c30 0);
+    transition:background .4s ease;
+    position:relative;
+  }
+  @media (prefers-reduced-motion: reduce){ .dial-ring{ transition:none; } }
+  .dial-ring::before{
+    content:"";
+    width:48px; height:48px;
+    border-radius:50%;
+    background:var(--soil-panel);
+  }
+  .dial-val{
+    position:absolute;
+    font-family:var(--mono);
+    font-size:12px;
+    font-weight:700;
+    color:var(--parchment);
+  }
+  .dial-name{
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+
+  /* ---------- Results ---------- */
+  .empty-state{
+    border:1.5px dashed var(--line);
+    border-radius:12px;
+    padding:44px 20px;
+    text-align:center;
+    color:var(--ink-dim);
+  }
+  .empty-state p{ margin:10px 0 0; font-size:13.5px; }
+  .empty-state .glyph{ font-size:30px; }
+
+  .results-list{ display:flex; flex-direction:column; gap:14px; }
+
+  .crop-card{
+    background:var(--parchment);
+    color:#28321f;
+    border-radius:12px;
+    padding:18px 20px;
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    gap:16px;
+    align-items:center;
+    position:relative;
+    overflow:hidden;
+    animation:rise .35s ease both;
+  }
+  @media (prefers-reduced-motion: reduce){ .crop-card{ animation:none; } }
+  @keyframes rise{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
+
+  .rank{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:26px;
+    font-weight:600;
+    color:var(--clay);
+    width:34px;
+    text-align:center;
+  }
+  .crop-main .crop-name{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:19px;
+    margin:0 0 3px;
+    color:#243016;
+  }
+  .crop-note{ font-size:12.5px; line-height:1.45; color:#4a4030; margin:0 0 8px; max-width:52ch; }
+  .tag-row{ display:flex; flex-wrap:wrap; gap:6px; }
+  .tag{
+    font-family:var(--mono);
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    background:rgba(40,50,30,.09);
+    padding:3px 8px;
+    border-radius:5px;
+    color:#4a5238;
+  }
+  .match{ text-align:right; min-width:78px; }
+  .match-pct{
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:20px;
+    color:#243016;
+  }
+  .match-bar{
+    width:74px; height:5px; border-radius:99px;
+    background:rgba(40,50,30,.15);
+    margin-top:7px;
+    overflow:hidden;
+  }
+  .match-bar span{
+    display:block; height:100%;
+    background:var(--leaf);
+    border-radius:99px;
+    transition:width .5s ease;
+  }
+  @media (prefers-reduced-motion: reduce){ .match-bar span{ transition:none; } }
+
+  @media (max-width:520px){
+    .crop-card{ grid-template-columns:auto 1fr; }
+    .match{ grid-column:2; text-align:left; margin-top:6px; }
+    .match-bar{ margin-left:0; }
+  }
+
+  footer{
+    margin-top:34px;
+    padding-top:16px;
+    border-top:1px solid var(--line);
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:var(--ink-dim);
+    letter-spacing:.04em;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <p class="eyebrow">Field Analysis Instrument · No. 04</p>
+      <h1>The Field <em>Almanac</em></h1>
+    </div>
+    <p class="tagline">Log your soil, temperature, humidity, rainfall and pH readings — the instrument cross-checks them against twenty field crops and ranks the closest match.</p>
+  </header>
+
+  <div class="grid">
+
+    <div>
+      <div class="panel">
+        <div class="panel-title">
+          <h2>Field Log</h2>
+          <span>Readings In</span>
+        </div>
+
+        <fieldset>
+          <legend>Soil type</legend>
+          <div class="chips" id="soilChips"></div>
+        </fieldset>
+
+        <div class="field">
+          <div class="field-head">
+            <label for="temp">Temperature</label>
+            <span class="readout"><span id="tempVal">27</span>°C</span>
+          </div>
+          <input type="range" id="temp" min="0" max="45" value="27">
+          <div class="scale-labels"><span>0°C</span><span>45°C</span></div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label for="humidity">Humidity</label>
+            <span class="readout"><span id="humidityVal">60</span>%</span>
+          </div>
+          <input type="range" id="humidity" min="0" max="100" value="60">
+          <div class="scale-labels"><span>0%</span><span>100%</span></div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label for="rainfall">Annual rainfall</label>
+            <span class="readout"><span id="rainfallVal">1000</span>mm</span>
+          </div>
+          <input type="range" id="rainfall" min="0" max="3000" step="50" value="1000">
+          <div class="scale-labels"><span>0mm</span><span>3000mm</span></div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label for="ph">Soil pH</label>
+            <span class="readout" id="phVal">6.5</span>
+          </div>
+          <input type="range" id="ph" min="3.5" max="9.5" step="0.1" value="6.5">
+          <div class="scale-labels"><span>3.5 acidic</span><span>9.5 alkaline</span></div>
+        </div>
+
+        <button class="analyze-btn" id="analyzeBtn">Analyze Field →</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <div class="panel-title">
+          <h2>Instrument Panel</h2>
+          <span id="soilDialName">— Live —</span>
+        </div>
+        <div class="dials">
+          <div class="dial">
+            <div class="dial-ring" id="ringTemp"><span class="dial-val" id="ringTempVal">27°</span></div>
+            <div class="dial-name">Temp</div>
+          </div>
+          <div class="dial">
+            <div class="dial-ring" id="ringHumidity"><span class="dial-val" id="ringHumidityVal">60%</span></div>
+            <div class="dial-name">Humidity</div>
+          </div>
+          <div class="dial">
+            <div class="dial-ring" id="ringRainfall"><span class="dial-val" id="ringRainfallVal">1000</span></div>
+            <div class="dial-name">Rain / mm</div>
+          </div>
+          <div class="dial">
+            <div class="dial-ring" id="ringPh"><span class="dial-val" id="ringPhVal">6.5</span></div>
+            <div class="dial-name">pH</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <h2>Recommended Crops</h2>
+          <span id="resultCount">Awaiting Analysis</span>
+        </div>
+        <div id="resultsArea">
+          <div class="empty-state">
+            <div class="glyph">🌱</div>
+            <p>No field data logged yet. Set your readings on the left, then analyze the field to see which crops fit best.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>ESTIMATES ARE ADVISORY · CROSS-CHECK AGAINST LOCAL AGRONOMIC ADVICE BEFORE PLANTING</footer>
+</div>
+
+<script>
+  const CROPS = [
+    { name:"Rice", soils:["Clay","Alluvial"], temp:[20,35], humidity:[60,90], rainfall:[1000,2500], ph:[5.5,7.5], note:"Loves standing water, heavy rain and humid heat — clay and alluvial paddies suit it best." },
+    { name:"Wheat", soils:["Loamy","Black","Alluvial"], temp:[10,25], humidity:[40,70], rainfall:[300,900], ph:[6,7.5], note:"A cool-season grain that wants well-drained loam and moderate, steady rainfall." },
+    { name:"Maize", soils:["Loamy","Alluvial","Red"], temp:[18,32], humidity:[50,80], rainfall:[500,1200], ph:[5.5,7.5], note:"Versatile and warm-loving, maize does well across loamy, alluvial and red soils." },
+    { name:"Cotton", soils:["Black","Alluvial"], temp:[21,35], humidity:[40,70], rainfall:[500,1000], ph:[6,8], note:"Deep-rooting black cotton soil holds moisture well through cotton's long dry spells." },
+    { name:"Sugarcane", soils:["Loamy","Alluvial","Clay"], temp:[20,38], humidity:[60,90], rainfall:[1200,2500], ph:[6,7.5], note:"A thirsty, heat-loving crop — needs deep fertile soil and heavy, consistent watering." },
+    { name:"Groundnut", soils:["Sandy","Red","Loamy"], temp:[20,30], humidity:[40,70], rainfall:[500,1000], ph:[6,7], note:"Pods develop best in loose, well-drained sandy or red soil that doesn't waterlog." },
+    { name:"Chickpea", soils:["Loamy","Black"], temp:[10,25], humidity:[30,60], rainfall:[300,700], ph:[6,7.5], note:"A cool, dry-season pulse — thrives on residual moisture in loam or black soil." },
+    { name:"Pearl Millet", soils:["Sandy","Red"], temp:[25,38], humidity:[25,55], rainfall:[250,600], ph:[6.5,8.5], note:"Bred for heat and drought — sandy or red soils with light rainfall are ideal." },
+    { name:"Mustard", soils:["Loamy","Alluvial"], temp:[10,25], humidity:[30,60], rainfall:[300,650], ph:[6,7.5], note:"A winter oilseed that prefers cool nights, dry air and fertile alluvial ground." },
+    { name:"Soybean", soils:["Black","Loamy"], temp:[20,30], humidity:[60,80], rainfall:[600,1200], ph:[6,7.5], note:"Monsoon-friendly — wants humid air and moisture-retentive black or loamy soil." },
+    { name:"Banana", soils:["Loamy","Alluvial"], temp:[22,32], humidity:[70,90], rainfall:[1200,2200], ph:[6,7.5], note:"Broad leaves lose water fast, so banana wants steady heat, humidity and deep loam." },
+    { name:"Mango", soils:["Alluvial","Laterite","Red"], temp:[24,36], humidity:[40,70], rainfall:[600,1500], ph:[5.5,7.5], note:"A hardy orchard tree — tolerant of red and lateritic soils once it's established." },
+    { name:"Coffee", soils:["Laterite","Red"], temp:[15,28], humidity:[70,90], rainfall:[1500,2500], ph:[5,6.5], note:"Shade-grown at altitude, coffee wants cool humidity and acidic lateritic soil." },
+    { name:"Tea", soils:["Laterite","Red"], temp:[15,30], humidity:[75,95], rainfall:[1800,3000], ph:[4.5,5.8], note:"The most acid-loving crop here — needs sharply drained, strongly acidic hill soil." },
+    { name:"Coconut", soils:["Sandy","Laterite","Alluvial"], temp:[25,36], humidity:[70,95], rainfall:[1200,2500], ph:[5,8], note:"Coastal by nature — sandy or lateritic soil with warm humid air suits it well." },
+    { name:"Jute", soils:["Alluvial","Clay"], temp:[24,38], humidity:[70,90], rainfall:[1200,2500], ph:[6,7.5], note:"A fibre crop for the flood plain — wants waterlogged clay or silty alluvial soil." },
+    { name:"Potato", soils:["Loamy","Sandy"], temp:[12,25], humidity:[55,80], rainfall:[400,900], ph:[5,6.5], note:"Tubers swell best in loose, cool, well-drained loam or sandy soil." },
+    { name:"Tomato", soils:["Loamy","Red","Alluvial"], temp:[18,30], humidity:[45,70], rainfall:[400,900], ph:[6,6.8], note:"Prefers warm days, moderate humidity and slightly acidic, well-drained loam." },
+    { name:"Sunflower", soils:["Black","Loamy","Red"], temp:[20,32], humidity:[35,65], rainfall:[400,900], ph:[6.5,7.5], note:"Deep-rooted and drought-tolerant — content in black, loamy or red soil." },
+    { name:"Barley", soils:["Loamy","Sandy"], temp:[8,25], humidity:[30,60], rainfall:[300,700], ph:[6,7.8], note:"The most cold- and salinity-tolerant grain here — light sandy loam suits it fine." }
+  ];
+
+  const SOILS = ["Loamy","Clay","Sandy","Black","Red","Alluvial","Laterite","Peaty"];
+
+  const chipWrap = document.getElementById('soilChips');
+  SOILS.forEach((soil, i) => {
+    const id = 'soil_' + soil;
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.innerHTML = `<input type="radio" name="soil" id="${id}" value="${soil}" ${i===0?'checked':''}>
+                       <label for="${id}">${soil}</label>`;
+    chipWrap.appendChild(chip);
+  });
+
+  const tempEl = document.getElementById('temp');
+  const humEl = document.getElementById('humidity');
+  const rainEl = document.getElementById('rainfall');
+  const phEl = document.getElementById('ph');
+
+  function pctOf(val, min, max){ return Math.max(0, Math.min(100, ((val-min)/(max-min))*100)); }
+
+  function refreshDials(){
+    const t = parseFloat(tempEl.value), h = parseFloat(humEl.value), r = parseFloat(rainEl.value), p = parseFloat(phEl.value);
+
+    document.getElementById('tempVal').textContent = t;
+    document.getElementById('humidityVal').textContent = h;
+    document.getElementById('rainfallVal').textContent = r;
+    document.getElementById('phVal').textContent = p.toFixed(1);
+
+    document.getElementById('ringTempVal').textContent = t + '°';
+    document.getElementById('ringHumidityVal').textContent = h + '%';
+    document.getElementById('ringRainfallVal').textContent = r;
+    document.getElementById('ringPhVal').textContent = p.toFixed(1);
+
+    document.getElementById('ringTemp').style.setProperty('--pct', pctOf(t,0,45));
+    document.getElementById('ringHumidity').style.setProperty('--pct', pctOf(h,0,100));
+    document.getElementById('ringRainfall').style.setProperty('--pct', pctOf(r,0,3000));
+    document.getElementById('ringPh').style.setProperty('--pct', pctOf(p,3.5,9.5));
+  }
+
+  [tempEl, humEl, rainEl, phEl].forEach(el => el.addEventListener('input', refreshDials));
+  refreshDials();
+
+  function rangeScore(value, [min, max]){
+    if (value >= min && value <= max) return 1;
+    const width = max - min;
+    const dist = value < min ? (min - value) : (value - max);
+    return Math.max(0, 1 - dist / width);
+  }
+
+  function scoreCrop(crop, inputs){
+    const soilScore = crop.soils.includes(inputs.soil) ? 1 : 0.25;
+    const tempScore = rangeScore(inputs.temp, crop.temp);
+    const humScore = rangeScore(inputs.humidity, crop.humidity);
+    const rainScore = rangeScore(inputs.rainfall, crop.rainfall);
+    const phScore = rangeScore(inputs.ph, crop.ph);
+
+    const weighted = (soilScore*0.28) + (tempScore*0.2) + (humScore*0.16) + (rainScore*0.16) + (phScore*0.2);
+    return Math.round(weighted * 100);
+  }
+
+  function renderResults(ranked){
+    const area = document.getElementById('resultsArea');
+    const count = document.getElementById('resultCount');
+    count.textContent = 'Top ' + ranked.length + ' Matches';
+
+    area.innerHTML = `<div class="results-list">` + ranked.map((r, i) => `
+      <div class="crop-card">
+        <div class="rank">${String(i+1).padStart(2,'0')}</div>
+        <div class="crop-main">
+          <p class="crop-name">${r.crop.name}</p>
+          <p class="crop-note">${r.crop.note}</p>
+          <div class="tag-row">
+            ${r.crop.soils.map(s => `<span class="tag">${s}</span>`).join('')}
+          </div>
+        </div>
+        <div class="match">
+          <div class="match-pct">${r.score}%</div>
+          <div class="match-bar"><span style="width:${r.score}%"></span></div>
+        </div>
+      </div>
+    `).join('') + `</div>`;
+  }
+
+  document.getElementById('analyzeBtn').addEventListener('click', () => {
+    const soil = document.querySelector('input[name="soil"]:checked').value;
+    const inputs = {
+      soil,
+      temp: parseFloat(tempEl.value),
+      humidity: parseFloat(humEl.value),
+      rainfall: parseFloat(rainEl.value),
+      ph: parseFloat(phEl.value)
+    };
+
+    document.getElementById('soilDialName').textContent = soil + ' Soil';
+
+    const ranked = CROPS
+      .map(crop => ({ crop, score: scoreCrop(crop, inputs) }))
+      .sort((a,b) => b.score - a.score)
+      .slice(0, 5);
+
+    renderResults(ranked);
+    document.getElementById('resultsArea').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  });
+</script>
+</body>
+</html>
